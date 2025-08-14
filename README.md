@@ -11,6 +11,7 @@ A local-first planner that combines **tasks + journaling** on a single **day pag
 
 ## Core Objects
 - **LifeArea** → **Goal** → **Project** → **Task**, plus **JournalEntry** and **DaySummary**.
+- **Life Areas**: Health, Friends & Family, Community, Self-Development, Career, Play & Creativity
 - Tasks belong to a LifeArea, may link to a Goal/Project, and can be **scheduled** to a date.
 
 ## MVP Scope
