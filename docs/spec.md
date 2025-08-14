@@ -1,76 +1,58 @@
-# Portfolio Life Planner - Technical Specification
+# Product Spec (Pinned)
 
-## Overview
-The Portfolio Life Planner is a comprehensive life management application that helps users organize and track various aspects of their lives through a portfolio-based approach.
+## Goal
+Ship a web MVP that lets a user (1) plan and journal each day on one page, (2) link tasks to long-term goals and life areas, and (3) view weekly balance across life areas.
 
-## Core Features
+## Data Model (summary)
+**LifeArea** { id, name, color, order }  
+**Goal** { id, lifeAreaId, title, targetDate?, status }  
+**Project** { id, goalId, title, status }  
+**Task** { id, lifeAreaId, goalId?, projectId?, title, notes?, priority?, estimatedMinutes?, scheduledDate?, completedAt?, tags[] }  
+**JournalEntry** { id, date, content, mood? }  
+**DaySummary** { date, reflection?, energyLevel?, score? }
 
-### 1. Life Portfolio Management
-- **Portfolio Creation**: Users can create multiple life portfolios for different life areas
-- **Category Organization**: Support for customizable life categories (career, health, relationships, etc.)
-- **Goal Tracking**: Set and monitor progress towards life goals
-- **Progress Visualization**: Charts and metrics to track portfolio performance
+## Pages & Routes
+- `/` → Month Calendar (dots by LifeArea; click day → `/day/[date]`).
+- `/day/[date]` → TaskList (for scheduledDate==date) + JournalEditor (autosave).
+- `/goals` (later) → Manage Goals; link tasks to goals.
+- `/settings` (later) → JSON export/import.
 
-### 2. User Management
-- **Authentication**: Secure user login and registration
-- **Profile Management**: User profiles with customizable settings
-- **Data Privacy**: User data isolation and security
+## Components
+- `CalendarMonth`, `TaskList`, `TaskItem`, `TaskQuickAdd`, `JournalEditor`, `GoalProgress`, `WeeklyBalance`, `FilterBar`.
 
-### 3. Data Management
-- **CRUD Operations**: Full create, read, update, delete functionality for all entities
-- **Data Persistence**: Reliable data storage with backup capabilities
-- **Import/Export**: Data portability features
+## Stack
+- Next.js + React + TypeScript + Tailwind  
+- Dexie (IndexedDB) local-first; Supabase (later)  
+- date-fns; lucide-react icons
 
-## Technical Architecture
+## MVP Acceptance (definition of done)
+- Create/edit/complete tasks and journal entries on a Day page; data persists across reloads.
+- Calendar navigates to Day pages.
+- LifeArea colors visible; minimal filters; `npm run typecheck` passes.
 
-### Frontend
-- **Framework**: React with TypeScript
-- **UI Library**: Material-UI or similar component library
-- **State Management**: Redux or Context API
-- **Routing**: React Router for navigation
+## Cursor Step Prompts (copy-paste)
+**0) Scaffold**  
+Create Next.js + TS + Tailwind; strict TS; scripts: dev/build/lint/typecheck.  
+**Files allowed:** new project files.  
+**Checks:** boots at `/`, Tailwind styles render.
 
-### Backend
-- **Runtime**: Node.js with Express
-- **Database**: PostgreSQL for relational data
-- **Authentication**: JWT-based authentication
-- **API**: RESTful API design
+**1) Dexie DB**  
+Implement tables: lifeAreas, goals, projects, tasks, journalEntries, daySummaries with indexes; export CRUD/query helpers.  
+**Files:** `src/lib/db.ts`, `src/types/*.ts`.  
+**Checks:** typecheck passes; seed inserts 3 LifeAreas.
 
-### Database Schema
-- **Users**: User accounts and profiles
-- **Portfolios**: Life portfolio containers
-- **Categories**: Life area classifications
-- **Goals**: Specific objectives within portfolios
-- **Progress**: Tracking data for goals
-- **Activities**: Logged actions and milestones
+**2) Calendar → Day**  
+Month grid at `/`; click cells → `/day/[date]`.  
+**Files:** `src/app/page.tsx`, `src/components/CalendarMonth.tsx`.  
+**Checks:** navigation works.
 
-## Development Phases
+**3) Day Page Core**  
+Two-pane layout: TaskList + JournalEditor with autosave and optimistic updates.  
+**Files:** `src/app/day/[date]/page.tsx`, `src/components/TaskList.tsx`, `src/components/JournalEditor.tsx`.  
+**Checks:** tasks/journal persist across reloads.
 
-### Phase 1: Core Infrastructure
-- Project setup and configuration
-- Database schema design and implementation
-- Basic API endpoints
-- User authentication system
+(Keep further steps—QuickAdd, Goals, WeeklyBalance, Export/Import—in issues.)
 
-### Phase 2: Portfolio Management
-- Portfolio CRUD operations
-- Category management
-- Basic goal tracking
-
-### Phase 3: Advanced Features
-- Progress visualization
-- Data import/export
-- Advanced analytics
-- Mobile responsiveness
-
-### Phase 4: Polish & Deployment
-- UI/UX improvements
-- Performance optimization
-- Testing and bug fixes
-- Production deployment
-
-## Technology Stack
-- **Frontend**: React, TypeScript, Material-UI
-- **Backend**: Node.js, Express, TypeScript
-- **Database**: PostgreSQL
-- **Authentication**: JWT
-- **Deployment**: Docker, cloud platform (TBD)
+## Conventions
+- UUID ids; `createdAt/updatedAt` timestamps.  
+- Keep prompts small; list allowed files; require file-tree output.
