@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Task, LifeArea } from '@/types';
 import { dbHelpers } from '@/lib/db';
 import { format, parseISO } from 'date-fns';
+import { useGoals } from '@/contexts/GoalsContext';
 
 interface TaskListProps {
   date: string;
@@ -14,8 +15,12 @@ export default function TaskList({ date }: TaskListProps) {
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState('');
   const [newTaskLifeAreaId, setNewTaskLifeAreaId] = useState('');
+  const [newTaskGoalId, setNewTaskGoalId] = useState('');
+  const [newTaskPriority, setNewTaskPriority] = useState<Task['priority']>('medium');
+  const [newTaskDueDate, setNewTaskDueDate] = useState('');
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState('');
+  const { goals } = useGoals();
 
   // Load tasks and life areas
   useEffect(() => {
@@ -38,21 +43,49 @@ export default function TaskList({ date }: TaskListProps) {
     loadData();
   }, [date, newTaskLifeAreaId]);
 
+  // Add a function to refresh tasks
+  const refreshTasks = useCallback(async () => {
+    try {
+      const taskList = await dbHelpers.tasks.getByDate(parseISO(date));
+      setTasks(taskList);
+    } catch (error) {
+      console.error('Error refreshing tasks:', error);
+    }
+  }, [date]);
+
+  // Refresh tasks when component receives focus (e.g., when navigating back from calendar)
+  useEffect(() => {
+    const handleFocus = () => {
+      refreshTasks();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
+  }, [date, refreshTasks]);
+
+
+
   // Create new task
   const handleCreateTask = async () => {
     if (!newTaskTitle.trim() || !newTaskLifeAreaId) return;
 
     try {
-      const newTask = await dbHelpers.tasks.create({
+      await dbHelpers.tasks.create({
         title: newTaskTitle.trim(),
         lifeAreaId: newTaskLifeAreaId,
-        priority: 'medium',
+        goalId: newTaskGoalId || undefined,
+        priority: newTaskPriority,
+        dueDate: newTaskDueDate ? parseISO(newTaskDueDate) : undefined,
         tags: [],
         scheduledDate: parseISO(date)
       });
       
-      setTasks(prev => [...prev, newTask]);
+      // Refresh the task list to ensure consistency
+      await refreshTasks();
       setNewTaskTitle('');
+      setNewTaskGoalId('');
+      setNewTaskPriority('medium');
+      setNewTaskDueDate('');
     } catch (error) {
       console.error('Error creating task:', error);
     }
@@ -127,39 +160,85 @@ export default function TaskList({ date }: TaskListProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-      <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
-        Tasks for {format(parseISO(date), 'EEEE, MMMM d')}
-      </h2>
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 overflow-hidden">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          Tasks for {format(parseISO(date), 'EEEE, MMMM d')}
+        </h2>
+        <button
+          onClick={refreshTasks}
+          className="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors"
+          title="Refresh tasks"
+        >
+          🔄
+        </button>
+      </div>
 
       {/* Add new task */}
-      <div className="flex gap-2 mb-6">
-        <input
-          type="text"
-          value={newTaskTitle}
-          onChange={(e) => setNewTaskTitle(e.target.value)}
-          placeholder="Add a new task..."
-          className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-          onKeyPress={(e) => e.key === 'Enter' && handleCreateTask()}
-        />
-        <select
-          value={newTaskLifeAreaId}
-          onChange={(e) => setNewTaskLifeAreaId(e.target.value)}
-          className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
-        >
-          {lifeAreas.map(area => (
-            <option key={area.id} value={area.id}>
-              {area.name}
-            </option>
-          ))}
-        </select>
-        <button
-          onClick={handleCreateTask}
-          disabled={!newTaskTitle.trim() || !newTaskLifeAreaId}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          Add
-        </button>
+      <div className="space-y-3 mb-6">
+        {/* Task title row */}
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={newTaskTitle}
+            onChange={(e) => setNewTaskTitle(e.target.value)}
+            placeholder="Add a new task..."
+            className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+            onKeyPress={(e) => e.key === 'Enter' && handleCreateTask()}
+          />
+          <button
+            onClick={handleCreateTask}
+            disabled={!newTaskTitle.trim() || !newTaskLifeAreaId}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          >
+            Add
+          </button>
+        </div>
+        
+        {/* Life area, goal, priority, and due date row */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 min-w-0">
+          <select
+            value={newTaskLifeAreaId}
+            onChange={(e) => setNewTaskLifeAreaId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white min-w-0"
+          >
+            {lifeAreas.map(area => (
+              <option key={area.id} value={area.id}>
+                {area.name}
+              </option>
+            ))}
+          </select>
+          <select
+            value={newTaskGoalId}
+            onChange={(e) => setNewTaskGoalId(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white min-w-0"
+          >
+            <option value="">No Goal</option>
+            {goals
+              .filter(goal => goal.lifeAreaId === newTaskLifeAreaId)
+              .map(goal => (
+                <option key={goal.id} value={goal.id}>
+                  {goal.title}
+                </option>
+              ))}
+          </select>
+          <select
+            value={newTaskPriority}
+            onChange={(e) => setNewTaskPriority(e.target.value as Task['priority'])}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white min-w-0"
+          >
+            <option value="low">Low Priority</option>
+            <option value="medium">Medium Priority</option>
+            <option value="high">High Priority</option>
+          </select>
+          <input
+            type="date"
+            value={newTaskDueDate}
+            onChange={(e) => setNewTaskDueDate(e.target.value)}
+            placeholder="Due Date"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white min-w-0"
+          />
+        </div>
       </div>
 
       {/* Task list */}
@@ -219,15 +298,32 @@ export default function TaskList({ date }: TaskListProps) {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span
-                      className={`flex-1 ${
-                        task.completedAt 
-                          ? 'line-through text-gray-500 dark:text-gray-400' 
-                          : 'text-gray-900 dark:text-white'
-                      }`}
-                    >
-                      {task.title}
-                    </span>
+                                         <div className="flex-1">
+                       <span
+                         className={`block ${
+                           task.completedAt 
+                             ? 'line-through text-gray-500 dark:text-gray-400' 
+                             : 'text-gray-900 dark:text-white'
+                         }`}
+                       >
+                         {task.title}
+                       </span>
+                       {task.goalId && (
+                         <span className="text-xs text-blue-600 dark:text-blue-400">
+                           🎯 {goals.find(g => g.id === task.goalId)?.title}
+                         </span>
+                       )}
+                       {task.dueDate && (
+                         <span className="text-xs text-orange-600 dark:text-orange-400">
+                           📅 Due: {format(task.dueDate, 'MMM d')}
+                         </span>
+                       )}
+                       {task.dependencies && task.dependencies.length > 0 && (
+                         <span className="text-xs text-purple-600 dark:text-purple-400">
+                           🔗 {task.dependencies.length} dependency{task.dependencies.length !== 1 ? 's' : ''}
+                         </span>
+                       )}
+                     </div>
                     <div className="flex gap-1">
                       <button
                         onClick={() => startEditing(task)}

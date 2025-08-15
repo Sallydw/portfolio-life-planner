@@ -11,6 +11,7 @@ export interface Goal {
   id: string;
   lifeAreaId: string;
   title: string;
+  description?: string;
   targetDate?: Date;
   status: 'active' | 'completed' | 'paused';
   createdAt: Date;
@@ -38,6 +39,10 @@ export interface Task {
   scheduledDate?: Date;
   completedAt?: Date;
   tags: string[];
+  // New fields for goal task management
+  dueDate?: Date;
+  dependencies?: string[]; // Array of task IDs this task depends on
+  isGoalTask?: boolean; // Flag to identify tasks created from goal breakdown
   createdAt: Date;
   updatedAt: Date;
 }

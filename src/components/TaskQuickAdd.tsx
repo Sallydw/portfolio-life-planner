@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Task, LifeArea } from '@/types';
+import { Task, LifeArea, Goal } from '@/types';
 import { dbHelpers } from '@/lib/db';
 import { format, parseISO } from 'date-fns';
+import { useGoals } from '@/contexts/GoalsContext';
 
 interface TaskQuickAddProps {
   isOpen: boolean;
@@ -15,11 +16,13 @@ interface TaskQuickAddProps {
 export default function TaskQuickAdd({ isOpen, onClose, selectedDate, onTaskCreated }: TaskQuickAddProps) {
   const [title, setTitle] = useState('');
   const [lifeAreaId, setLifeAreaId] = useState('');
+  const [goalId, setGoalId] = useState('');
   const [date, setDate] = useState(selectedDate || new Date());
   const [priority, setPriority] = useState<Task['priority']>('medium');
   const [notes, setNotes] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [lifeAreas, setLifeAreas] = useState<LifeArea[]>([]);
+  const { goals } = useGoals();
 
   // Load life areas
   useEffect(() => {
@@ -38,6 +41,8 @@ export default function TaskQuickAdd({ isOpen, onClose, selectedDate, onTaskCrea
     loadLifeAreas();
   }, [lifeAreaId]);
 
+
+
   // Update date when selectedDate prop changes
   useEffect(() => {
     if (selectedDate) {
@@ -49,6 +54,7 @@ export default function TaskQuickAdd({ isOpen, onClose, selectedDate, onTaskCrea
   useEffect(() => {
     if (isOpen) {
       setTitle('');
+      setGoalId('');
       setNotes('');
       setPriority('medium');
       if (selectedDate) {
@@ -66,6 +72,7 @@ export default function TaskQuickAdd({ isOpen, onClose, selectedDate, onTaskCrea
       const newTask = await dbHelpers.tasks.create({
         title: title.trim(),
         lifeAreaId,
+        goalId: goalId || undefined,
         priority,
         notes: notes.trim() || undefined,
         tags: [],
@@ -151,6 +158,29 @@ export default function TaskQuickAdd({ isOpen, onClose, selectedDate, onTaskCrea
                   {area.name}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Goal */}
+          <div>
+            <label htmlFor="goal" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Goal (optional)
+            </label>
+            <select
+              id="goal"
+              value={goalId}
+              onChange={(e) => setGoalId(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white"
+              disabled={isCreating}
+            >
+              <option value="">No Goal</option>
+              {goals
+                .filter(goal => goal.lifeAreaId === lifeAreaId)
+                .map(goal => (
+                  <option key={goal.id} value={goal.id}>
+                    {goal.title}
+                  </option>
+                ))}
             </select>
           </div>
 

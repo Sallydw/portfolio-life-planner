@@ -32,7 +32,7 @@ export class PortfolioLifePlannerDB extends Dexie {
       [TABLE_NAMES.LIFE_AREAS]: 'id, name, order',
       [TABLE_NAMES.GOALS]: 'id, lifeAreaId, status, targetDate',
       [TABLE_NAMES.PROJECTS]: 'id, goalId, status',
-      [TABLE_NAMES.TASKS]: 'id, lifeAreaId, goalId, projectId, scheduledDate, completedAt, priority',
+      [TABLE_NAMES.TASKS]: 'id, lifeAreaId, goalId, projectId, scheduledDate, completedAt, priority, dueDate, dependencies, isGoalTask',
       [TABLE_NAMES.JOURNAL_ENTRIES]: 'id, date',
       [TABLE_NAMES.DAY_SUMMARIES]: 'date',
     });
@@ -181,8 +181,22 @@ export const taskHelpers = {
   },
 
   async getByDate(date: Date): Promise<Task[]> {
+    // Get all tasks and filter by date since IndexedDB date comparison can be tricky
+    const allTasks = await db.tasks.toArray();
     const dateStr = date.toISOString().split('T')[0];
-    return await db.tasks.where('scheduledDate').equals(dateStr).toArray();
+    
+    return allTasks.filter(task => {
+      if (!task.scheduledDate) return false;
+      
+      // Handle both Date objects and string dates
+      if (task.scheduledDate instanceof Date) {
+        return task.scheduledDate.toISOString().split('T')[0] === dateStr;
+      } else if (typeof task.scheduledDate === 'string') {
+        return task.scheduledDate === dateStr;
+      }
+      
+      return false;
+    });
   },
 
   async getCompleted(): Promise<Task[]> {
@@ -194,6 +208,9 @@ export const taskHelpers = {
     const task: Task = {
       id: uuidv4(),
       ...data,
+      // Ensure optional fields have default values
+      dependencies: data.dependencies || [],
+      isGoalTask: data.isGoalTask || false,
       createdAt: now,
       updatedAt: now,
     };
@@ -316,23 +333,50 @@ export const daySummaryHelpers = {
   },
 };
 
+// Clear database function
+export async function clearDatabase(): Promise<void> {
+  try {
+    await db.transaction('rw', [db.lifeAreas, db.goals, db.projects, db.tasks, db.journalEntries, db.daySummaries], async () => {
+      await db.lifeAreas.clear();
+      await db.goals.clear();
+      await db.projects.clear();
+      await db.tasks.clear();
+      await db.journalEntries.clear();
+      await db.daySummaries.clear();
+    });
+    console.log('Database cleared successfully!');
+  } catch (error) {
+    console.error('Error clearing database:', error);
+  }
+}
+
 // Seed data function
 export async function seedDatabase(): Promise<void> {
-  // Check if already seeded
-  const existingLifeAreas = await lifeAreaHelpers.getAll();
-  if (existingLifeAreas.length > 0) return;
+  try {
+    // Check if already seeded
+    const existingLifeAreas = await lifeAreaHelpers.getAll();
+    if (existingLifeAreas.length > 0) {
+      console.log('Database already seeded, skipping...');
+      return;
+    }
 
-  // Create default life areas
-  const lifeAreas = [
-    { name: 'Health', color: '#10B981', order: 1 },
-    { name: 'Family', color: '#3B82F6', order: 2 },
-    { name: 'Finance', color: '#F59E0B', order: 3 },
-    { name: 'Learning', color: '#8B5CF6', order: 4 },
-    { name: 'Community', color: '#EF4444', order: 5 },
-  ];
+    // Create default life areas
+    const lifeAreas = [
+      { name: 'Health', color: '#10B981', order: 1 },
+      { name: 'Friends & Family', color: '#F59E0B', order: 2 },
+      { name: 'Community', color: '#EF4444', order: 3 },
+      { name: 'Self-Development', color: '#8B5CF6', order: 4 },
+      { name: 'Career', color: '#3B82F6', order: 5 },
+      { name: 'Play & Creativity', color: '#EC4899', order: 6 },
+    ];
 
-  for (const lifeArea of lifeAreas) {
-    await lifeAreaHelpers.create(lifeArea);
+    for (const lifeArea of lifeAreas) {
+      await lifeAreaHelpers.create(lifeArea);
+    }
+
+    console.log('Database seeded successfully!');
+  } catch (error) {
+    console.error('Error seeding database:', error);
   }
 }
 
@@ -345,4 +389,5 @@ export const dbHelpers = {
   journalEntries: journalEntryHelpers,
   daySummaries: daySummaryHelpers,
   seed: seedDatabase,
+  clear: clearDatabase,
 };

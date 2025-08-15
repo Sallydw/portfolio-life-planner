@@ -73,8 +73,11 @@ export default function CalendarMonth({ currentDate = new Date() }: CalendarMont
 
   // Handle task creation from quick add
   const handleTaskCreated = (task: Task) => {
-    // Optionally refresh the calendar or show a success message
+    // Show success feedback and optionally refresh the calendar
     console.log('Task created:', task);
+    
+    // You could add a toast notification here
+    // For now, we'll just close the modal and the user can navigate to the day page to see the task
   };
 
   // Get day of week headers
@@ -95,12 +98,27 @@ export default function CalendarMonth({ currentDate = new Date() }: CalendarMont
           <h1 className="text-2xl font-bold">
             {format(monthStart, 'MMMM yyyy')}
           </h1>
-          <button
-            onClick={goToToday}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            Today
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={goToToday}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+            >
+              Today
+            </button>
+            <button
+              onClick={() => router.push('/goals')}
+              className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              Goals
+            </button>
+            <button
+              onClick={() => router.push('/life-areas')}
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
+            >
+              Life Areas
+            </button>
+
+          </div>
         </div>
         
         <button

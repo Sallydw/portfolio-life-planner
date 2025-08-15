@@ -34,12 +34,12 @@ export default function DayPage() {
       {/* Two-pane layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left pane: TaskList */}
-        <div className="order-2 lg:order-1">
+        <div className="order-2 lg:order-1 min-w-0">
           <TaskList date={dateString} />
         </div>
 
         {/* Right pane: JournalEditor */}
-        <div className="order-1 lg:order-2">
+        <div className="order-1 lg:order-2 min-w-0">
           <JournalEditor date={dateString} />
         </div>
       </div>
