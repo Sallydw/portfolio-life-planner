@@ -7,43 +7,30 @@ A modern, local-first life planning application that combines **daily task manag
 ![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwind-css)
 
-## 🎯 Overview
+## Overview
 
 Portfolio Life Planner helps you organize your life by connecting daily tasks to long-term goals across different life areas (Health, Family, Career, Learning, etc.). It's designed as a single-page-per-day experience where you can manage tasks and journal your thoughts, all while maintaining visibility into your broader life goals.
 
 ### Key Features
 
-- 📅 **Calendar View**: Visual month calendar with task indicators, click any day to dive in
-- ✅ **Daily Task Management**: Create, edit, complete tasks with priorities, due dates, and dependencies
-- 🎯 **Goal Breakdown**: Break down complex goals into actionable sub-tasks with scheduling
-- 📝 **Daily Journaling**: Integrated journal editor with autosave functionality
-- 🎨 **Life Areas**: Organize tasks by life areas (Health, Family, Career, Learning, etc.)
-- 🔗 **Goal-Task Linking**: Connect tasks to goals for better context and progress tracking
-- 📊 **Progress Tracking**: Visual progress indicators for goals and tasks
-- 🌙 **Dark Mode**: Built-in dark mode support
-- 💾 **Local-First**: All data stored locally using IndexedDB (no backend required)
-- ⚡ **Fast & Responsive**: Optimized for performance with Next.js and React
+- **Calendar View**: Visual month calendar with task indicators, click any day to dive in
+- **Daily Task Management**: Create, edit, complete tasks with priorities, due dates, and dependencies
+- **Goal Breakdown**: Break down complex goals into actionable sub-tasks with scheduling
+- **Daily Journaling**: Integrated journal editor with autosave functionality
+- **Life Areas**: Organize tasks by life areas (Health, Family, Career, Learning, etc.)
+- **Goal-Task Linking**: Connect tasks to goals for better context and progress tracking
+- **Progress Tracking**: Visual progress indicators for goals and tasks
+- **Dark Mode**: Built-in dark mode support
+- **Local-First**: All data stored locally using IndexedDB (no backend required)
+- **Fast & Responsive**: Optimized for performance with Next.js and React
 
-## 🚀 Live Demo
+## Live Demo
 
 *[Add your Vercel deployment URL here after deploying]*
 
 **Example:** `https://portfolio-life-planner.vercel.app`
 
-## 📸 Screenshots
-
-*[Add screenshots of key features here]*
-
-### Calendar View
-![Calendar View](./docs/screenshots/calendar.png)
-
-### Daily Task & Journal Page
-![Daily Page](./docs/screenshots/daily-page.png)
-
-### Goal Management
-![Goals](./docs/screenshots/goals.png)
-
-## 🛠️ Tech Stack
+## Tech Stack
 
 ### Frontend
 - **Next.js 15.4** - React framework with App Router
@@ -59,7 +46,7 @@ Portfolio Life Planner helps you organize your life by connecting daily tasks to
 - **date-fns** - Date manipulation and formatting
 - **UUID** - Unique identifier generation
 
-## 📦 Installation
+## Installation
 
 ### Prerequisites
 - Node.js 18+ and npm/yarn/pnpm
@@ -101,7 +88,7 @@ npm run build
 npm start
 ```
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 portfolio-life-planner/
@@ -129,7 +116,7 @@ portfolio-life-planner/
 └── public/                   # Static assets
 ```
 
-## 🎨 Core Concepts
+## Core Concepts
 
 ### Life Areas
 Organize your life into meaningful categories:
@@ -161,7 +148,7 @@ Reflect on each day with:
 - Auto-save functionality
 - Date-specific entries
 
-## 🔑 Key Features in Detail
+## Key Features in Detail
 
 ### Goal Task Breakdown
 Break complex goals into manageable sub-tasks:
@@ -182,7 +169,7 @@ Break complex goals into manageable sub-tasks:
 - Works completely offline
 - Data persists across browser sessions
 
-## 🧪 Development
+## Development
 
 ### Available Scripts
 
@@ -199,7 +186,7 @@ npm run typecheck    # Run TypeScript type checking
 - ESLint for code quality
 - Strict TypeScript configuration
 
-## 🗺️ Roadmap
+## Roadmap
 
 ### Planned Features
 - [ ] Data export/import (JSON)
@@ -218,7 +205,7 @@ npm run typecheck    # Run TypeScript type checking
 - Email reminders
 - AI-powered task suggestions
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
@@ -228,17 +215,17 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
+## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
+## Author
 
 **Your Name**
 - GitHub: [@yourusername](https://github.com/yourusername)
 - LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 - Built with [Next.js](https://nextjs.org/)
 - UI styling with [Tailwind CSS](https://tailwindcss.com/)
@@ -247,4 +234,4 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with ❤️ for better life planning**
+Built with care for better life planning
