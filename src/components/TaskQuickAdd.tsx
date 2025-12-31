@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Task, LifeArea, Goal } from '@/types';
+import { Task, LifeArea } from '@/types';
 import { dbHelpers } from '@/lib/db';
 import { format, parseISO } from 'date-fns';
 import { useGoals } from '@/contexts/GoalsContext';

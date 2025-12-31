@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Goal, LifeArea, Task } from '@/types';
 import { dbHelpers } from '@/lib/db';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
 import { useGoals } from '@/contexts/GoalsContext';
 import GoalTaskManager from '@/components/GoalTaskManager';
 
@@ -91,7 +91,7 @@ export default function GoalDetailPage() {
   };
 
   // Handle goal task creation
-  const handleTasksCreated = async (newTasks: Task[]) => {
+  const handleTasksCreated = async () => {
     // Refresh the tasks list to show newly created tasks
     try {
       const goalTasks = await dbHelpers.tasks.getByGoal(goalId);

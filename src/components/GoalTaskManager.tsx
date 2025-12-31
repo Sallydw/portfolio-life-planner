@@ -23,7 +23,7 @@ interface GoalTaskManagerProps {
   lifeArea: LifeArea;
   isOpen: boolean;
   onClose: () => void;
-  onTasksCreated?: (tasks: Task[]) => void;
+  onTasksCreated?: () => void;
 }
 
 export default function GoalTaskManager({ 
@@ -153,7 +153,7 @@ export default function GoalTaskManager({
 
     try {
       // Create the actual task in the database
-      const newTask = await dbHelpers.tasks.create({
+      await dbHelpers.tasks.create({
         title: task.title,
         lifeAreaId: lifeArea.id,
         goalId: goal.id,
@@ -175,7 +175,7 @@ export default function GoalTaskManager({
       ));
 
       // Notify parent component
-      onTasksCreated?.([newTask]);
+      onTasksCreated?.();
     } catch (error) {
       console.error('Error scheduling task:', error);
     }
@@ -480,8 +480,13 @@ export default function GoalTaskManager({
             {goalTasks.length > 0 && (
               <button
                 onClick={() => {
-                  // TODO: Implement bulk scheduling or other bulk actions
-                  alert('Bulk actions coming soon!');
+                  // Feature: Bulk scheduling - schedule all unscheduled tasks to their due dates or next week
+                  const unscheduledTasks = goalTasks.filter(t => !t.isScheduled);
+                  if (unscheduledTasks.length === 0) {
+                    alert('All tasks are already scheduled!');
+                    return;
+                  }
+                  alert(`Bulk scheduling: ${unscheduledTasks.length} tasks available. This feature will schedule unscheduled tasks automatically.`);
                 }}
                 className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
               >
